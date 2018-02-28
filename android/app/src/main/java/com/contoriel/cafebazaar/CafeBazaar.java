@@ -3,6 +3,7 @@ package com.contoriel.cafebazaar;
 import android.app.Activity;
 import android.util.Log;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -110,6 +111,18 @@ public class CafeBazaar extends ReactContextBaseJavaModule implements ActivityEv
       });
   }
 
+    @ReactMethod
+    public void isCafeBazaarInstalled(final Promise promise) {
+        boolean isInstalled = false;
+        try {
+            PackageManager pm = _reactContext.getPackageManager();
+            pm.getPackageInfo("com.farsitel.bazaar", PackageManager.GET_ACTIVITIES);
+            isInstalled = true;
+        } catch (PackageManager.NameNotFoundException e) {
+        } finally {
+            promise.resolve(isInstalled);
+        }
+    }
 
   @ReactMethod
   public void loadInventory(ReadableArray skuList,final Promise promise){
