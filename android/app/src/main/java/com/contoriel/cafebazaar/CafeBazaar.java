@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.lang.Object;
+import java.lang.Throwable;
 
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -113,14 +114,27 @@ public class CafeBazaar extends ReactContextBaseJavaModule implements ActivityEv
 
     @ReactMethod
     public void isCafeBazaarInstalled(final Promise promise) {
-        boolean isInstalled = false;
+        boolean result = false;
         try {
             PackageManager pm = _reactContext.getPackageManager();
             pm.getPackageInfo("com.farsitel.bazaar", PackageManager.GET_ACTIVITIES);
-            isInstalled = true;
+            result = true;
         } catch (PackageManager.NameNotFoundException e) {
         } finally {
-            promise.resolve(isInstalled);
+            promise.resolve(result);
+        }
+    }
+
+    @ReactMethod
+    public void isInstalledByCafeBazaar(final Promise promise) {
+        boolean result = false;
+        try {
+            PackageManager pm = _reactContext.getPackageManager();
+            String installerPackageName = pm.getInstallerPackageName(_reactContext.getPackageName());
+            result = installerPackageName.equals("com.farsitel.bazaar");
+        } catch (Throwable e) {
+        } finally {
+            promise.resolve(result);
         }
     }
 
