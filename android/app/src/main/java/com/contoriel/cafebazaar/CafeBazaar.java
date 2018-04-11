@@ -273,6 +273,39 @@ public class CafeBazaar extends ReactContextBaseJavaModule implements ActivityEv
       }
   }
 
+  @ReactMethod
+  public void subscribe(String sku,String payload,int rcRequest,final Promise promise) {
+      try{
+        mHelper.launchSubscriptionPurchaseFlow(getCurrentActivity(), sku, rcRequest,
+        new IabHelper.OnIabPurchaseFinishedListener() {
+        public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
+            // if we were disposed of in the meantime, quit.
+            WritableMap params = Arguments.createMap();
+
+            if (mHelper == null){
+              promise.reject(E_PURCHASE_DISCONNECT,"Connection Error!");
+            }
+            else{
+              if (result.isFailure()) {
+                  promise.reject(E_PURCHASE_FAILURE,result.getMessage());
+              }
+              else{
+                if (!verifyDeveloperPayload(purchase)) {
+                    promise.reject(E_PURCHASE_PAYLOAD_VERIFY,"could not verify developer payload");
+                }
+                else{
+                  promise.resolve(gson.toJson(purchase));
+                }
+              }
+            }
+          }
+        }, payload);
+      }
+      catch (Exception ex){
+        promise.reject(E_PURCHASE_ERROR,ex.getMessage());
+      }
+  }
+
   /** Verifies the developer payload of a purchase. */
   boolean verifyDeveloperPayload(Purchase p) {
       String payload = p.getDeveloperPayload();
